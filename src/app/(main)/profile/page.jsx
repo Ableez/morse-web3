@@ -66,7 +66,7 @@ export default function UserProfile() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/contents/get-user-nfts/${user.id}`
+        `https://morse-backend.vercel.app/api/contents/get-user-nfts/${user.id}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user contents");

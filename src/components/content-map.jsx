@@ -172,7 +172,7 @@ export default function NFTDisplay(props) {
 
       // Update backend to reflect purchase
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/contents/purchase/${nft.id}`,
+        `https://morse-backend.vercel.app/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
           headers: {

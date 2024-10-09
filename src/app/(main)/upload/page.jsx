@@ -118,16 +118,13 @@ const CreatorUpload = () => {
   const saveToDatabase = async (data) => {
     // Implement database save logic
 
-    const resp = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND}/api/contents`,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const resp = await fetch(`https://morse-backend.vercel.app/api/contents`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
     return await resp.json();
   };

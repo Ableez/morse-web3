@@ -14,7 +14,7 @@ export const createUserFunction = inngest.createFunction(
         primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
       const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/users/create`,
+        `https://morse-backend.vercel.app/api/users/create`,
         {
           method: "POST",
           headers: {
@@ -51,7 +51,7 @@ export const updateUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/users/update/${event.data.id}`,
+        `https://morse-backend.vercel.app/api/users/update/${event.data.id}`,
         {
           method: "PUT",
           headers: {
@@ -88,7 +88,7 @@ export const deleteUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/users/delete/${event.data.id}`,
+        `https://morse-backend.vercel.app/api/users/delete/${event.data.id}`,
         {
           method: "DELETE",
         }

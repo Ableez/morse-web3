@@ -261,7 +261,7 @@ export default function CreatorUpload() {
       };
 
       const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND}/api/contents`,
+        `https://morse-backend.vercel.app/api/contents`,
         {
           method: "POST",
           headers: {
