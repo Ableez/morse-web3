@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { pinata } from "../../../../utils/pinata";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const runtime = "edge"; // Add this line
 
 export async function POST(request) {
   try {
