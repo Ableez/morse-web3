@@ -1,18 +1,13 @@
-import { pinata } from "../../../../../../utils/pinata";
+import { NextResponse } from "next/server";
 
 export const GET = async (request, { params }) => {
   try {
     const cid = params.cid;
 
-    console.log("CID", cid);
+    const fileBlob = await fetch(`${process.env.PINATA_API_GATEWAY}/${cid}`);
 
-    const url = await pinata.gateways.createSignedURL({
-      cid: cid,
-      expires: 60 * 60 * 1, // 1 HOUR
-    });
-
-    console.log("URL", url);
-    return NextResponse.json({ url: url });
+    console.log("URL", fileBlob);
+    return NextResponse.json({ url: fileBlob });
   } catch (e) {
     console.log(e);
     return NextResponse.json(

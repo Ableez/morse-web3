@@ -12,24 +12,30 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Download, View } from "lucide-react";
-import axios from "axios";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Loader2,
+  View,
+} from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 import ContractABI from "../../../../../../utils/transaction/AcademicMarketplace.json";
-
+import { fetchContent } from "../../../../../lib/fetch-nft";
 // Set up the PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js";
 
 export default function NFTContentViewer({ content }) {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [contentURI, setContentURI] = useState(null);
+  const [pdfData, setPdfData] = useState(null);
   const { toast } = useToast();
   const { user } = useUser();
-  const [loading, setLoading] = useState(false);
-  const [blob, setBlob] = useState(null);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -38,10 +44,10 @@ export default function NFTContentViewer({ content }) {
   const hasAccess = content.accesses.length > 0 && content.accesses[0].isActive;
 
   const view = async () => {
-    console.log(user);
+    setViewLoading(true);
     if (!user?.primaryWeb3Wallet) {
       toast({ title: "Please login and connect your wallet first" });
-      setLoading(false);
+      setViewLoading(false);
       return;
     }
 
@@ -49,7 +55,7 @@ export default function NFTContentViewer({ content }) {
       toast({
         title: "Ethereum provider is not available. Please install MetaMask.",
       });
-      setLoading(false);
+      setViewLoading(false);
       return;
     }
 
@@ -64,47 +70,53 @@ export default function NFTContentViewer({ content }) {
         toast({
           title: "Please connect your wallet to Arbitrum Sepolia testnet",
         });
-        setLoading(false);
+        setViewLoading(false);
         return;
       }
 
-      const userAddress = await signer.getAddress();
-
       const contract = new ethers.Contract(
-        "0x809C9cf33B1CE2BF7daaD14ad1CD99C64eb5a179",
+        "0xB82946847Ea8b3AB5061ef6a00622980aD4dF957",
         ContractABI.abi,
         signer
       );
 
-      console.log("CONTRACT", contract);
-
       // Fetch content for viewing
       const cid = await contract.getContentURI(content.tokenId);
-      const resp = await fetch(`/api/pinata/get/${cid}`);
+      const { base64, contentType } = await fetchContent(cid);
+
+      const file = new File([base64], `${content.title}.pdf`, {
+        type: contentType,
+      });
+      console.log("FILE: ", file);
+      setPdfData(file);
+      toast({ title: "Content loaded successfully" });
     } catch (err) {
       console.error("Error while viewing content:", err);
+      toast({ title: "Error viewing content", description: err.message });
     } finally {
-      setLoading(false);
+      setViewLoading(false);
     }
   };
 
-  const downloadPDF = async () => {
-    if (contentURI) {
+  const downloadPDF = () => {
+    if (pdfData) {
+      setDownloadLoading(true);
       try {
-        const response = await axios.get(contentURI, {
-          responseType: "blob",
-        });
-        setBlob(response.data);
-        const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", `${content.title}.pdf`);
+        link.href = pdfData;
+        link.download = `${content.title}.pdf`;
         document.body.appendChild(link);
         link.click();
-        link.remove();
+        document.body.removeChild(link);
+        toast({ title: "File downloaded successfully" });
       } catch (error) {
         console.error("Error downloading the PDF:", error);
-        toast({ title: "Error downloading the file" });
+        toast({
+          title: "Error downloading the file",
+          description: error.message,
+        });
+      } finally {
+        setDownloadLoading(false);
       }
     }
   };
@@ -138,9 +150,9 @@ export default function NFTContentViewer({ content }) {
                 </TabsList>
                 <TabsContent value="preview">
                   <div className="border rounded-lg overflow-hidden bg-muted">
-                    {contentURI ? (
+                    {pdfData ? (
                       <Document
-                        file={contentURI}
+                        file={pdfData}
                         onLoadSuccess={onDocumentLoadSuccess}
                         className="mx-auto"
                       >
@@ -202,18 +214,29 @@ export default function NFTContentViewer({ content }) {
                   <>
                     <Button
                       variant="outline"
-                      className="w-full justify-start"
+                      className="w-full gap-2 justify-start"
                       onClick={() => view()}
+                      disabled={viewLoading}
                     >
-                      <View className="mr-2 h-4 w-4 text-emerald-600" /> View
+                      {viewLoading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <View className="mr-2 h-4 w-4 text-emerald-600" />
+                      )}
+                      {viewLoading ? "Loading..." : "View"}
                     </Button>
                     <Button
                       variant="outline"
                       className="w-full justify-start"
                       onClick={() => downloadPDF()}
+                      disabled={downloadLoading || !pdfData}
                     >
-                      <Download className="mr-2 h-4 w-4 text-rose-600" />{" "}
-                      Download
+                      {downloadLoading ? (
+                        <Loader2 size={16} className="animate-spin mr-2" />
+                      ) : (
+                        <Download className="mr-2 h-4 w-4 text-rose-600" />
+                      )}
+                      {downloadLoading ? "Downloading..." : "Download"}
                     </Button>
                   </>
                 ) : (

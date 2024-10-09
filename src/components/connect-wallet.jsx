@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 const ConnectWallet = () => {
   const { user } = useUser();
   return (
-    <div>
+    <div className={"w-full"}>
       <div
         className={`border dark:border-neutral-800 py-2 pr-8 px-4 rounded-md flex align-middle place-items-center gap-1`}
       >

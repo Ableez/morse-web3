@@ -260,13 +260,16 @@ export default function CreatorUpload() {
         tokenId,
       };
 
-      const resp = await fetch(`http://localhost:3030/api/contents`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(nwct),
-      });
+      const resp = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND}/api/contents`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(nwct),
+        }
+      );
 
       const dbResp = await resp.json();
 

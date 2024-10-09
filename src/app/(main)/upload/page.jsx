@@ -15,10 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
-import { ethers } from "ethers";
-import ContractABI from "../../../../utils/transaction/AcademicMarketplace.json";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ethers } from "ethers";
+import ContractABI from "../../../../utils/transaction/MorseAcademy.json";
 
 const CreatorUpload = () => {
   const [contentData, setContentData] = useState({
@@ -56,11 +56,13 @@ const CreatorUpload = () => {
 
   const estimateGasFee = async () => {
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const gasPrice = await provider.getGasPrice();
-      const estimatedGasLimit = 500000; // This is an estimate, adjust as needed
-      const estimatedGasFee = gasPrice.mul(estimatedGasLimit);
-      setEstimatedGas(ethers.utils.formatEther(estimatedGasFee));
+      if (typeof window.ethereum !== "undefined") {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const gasPrice = await provider.getGasPrice();
+        const estimatedGasLimit = 500000; // This is an estimate, adjust as needed
+        const estimatedGasFee = gasPrice.mul(estimatedGasLimit);
+        setEstimatedGas(ethers.utils.formatEther(estimatedGasFee));
+      }
     } catch (error) {
       console.error("Failed to estimate gas fee:", error);
     }
@@ -116,131 +118,150 @@ const CreatorUpload = () => {
   const saveToDatabase = async (data) => {
     // Implement database save logic
 
-    const resp = await fetch(`http://localhost:3030/api/contents`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const resp = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND}/api/contents`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     return await resp.json();
+  };
+
+  const switchToArbitrumSepolia = async (provider) => {
+    try {
+      console.log("Attempting to switch to Arbitrum Sepolia...");
+      await provider.send("wallet_switchEthereumChain", [
+        { chainId: "0x66eee" },
+      ]);
+      console.log("Successfully switched to Arbitrum Sepolia");
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask.
+      if (switchError.code === 4902) {
+        console.log(
+          "Arbitrum Sepolia not found, attempting to add the network..."
+        );
+        try {
+          await provider.send("wallet_addEthereumChain", [
+            {
+              chainId: "0x66eee",
+              chainName: "Arbitrum Sepolia",
+              nativeCurrency: {
+                name: "Ethereum",
+                symbol: "ETH",
+                decimals: 18,
+              },
+              rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
+              blockExplorerUrls: ["https://sepolia.arbiscan.io"],
+            },
+          ]);
+          console.log("Arbitrum Sepolia network added successfully");
+        } catch (addError) {
+          console.error("Failed to add Arbitrum Sepolia network:", addError);
+          throw new Error("Failed to add Arbitrum Sepolia network");
+        }
+      } else {
+        console.error("Failed to switch to Arbitrum Sepolia:", switchError);
+        throw switchError;
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (
-      !contentData.file ||
-      contentData.file.length === 0 ||
-      !contentData.title ||
-      !contentData.description ||
-      !contentData.priceUSD ||
-      !contentData.priceETH
-    ) {
-      toast({ title: "Please fill in all fields" });
-      setLoading(false);
-      return;
-    }
-
-    if (!user.isSignedIn || !user.user.primaryWeb3Wallet) {
-      toast({ title: "Please login and connect your wallet first" });
-      setLoading(false);
-      return;
-    }
-
-    if (typeof window.ethereum === "undefined") {
-      toast({
-        title: "Ethereum provider is not available. Please install MetaMask.",
-      });
-      setLoading(false);
-      return;
-    }
-
     try {
+      console.log("Starting content upload process...");
+
+      // Validation checks
+      if (
+        !contentData.file ||
+        contentData.file.length === 0 ||
+        !contentData.title ||
+        !contentData.description ||
+        !contentData.priceUSD ||
+        !contentData.priceETH
+      ) {
+        console.log("Validation failed: Missing required fields");
+        toast({ title: "Please fill in all fields" });
+        return;
+      }
+
+      if (!user.isSignedIn || !user.user.primaryWeb3Wallet) {
+        console.log("User not signed in or wallet not connected");
+        toast({ title: "Please login and connect your wallet first" });
+        return;
+      }
+
+      if (typeof window.ethereum === "undefined") {
+        console.log("Ethereum provider not available");
+        toast({
+          title: "Ethereum provider is not available. Please install MetaMask.",
+        });
+        return;
+      }
+
+      console.log("Requesting Ethereum accounts...");
       await window.ethereum.request({ method: "eth_requestAccounts" });
-      console.log("ETHEREUM:", window.ethereum);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-
-      console.log("SIGNERS", signer);
-
-      // Check if the network is supported
-      const network = await provider.getNetwork();
-      console.log("Current network:", network);
-
-      return;
-
-      // const price = await provider.getEtherPrice();
-      // console.log("Current price:", price);
-
-      if (network.chainId !== 421614) {
-        toast({
-          title: "Please connect your wallet to Arbitrum Sepolia testnet",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Ensure the provider is connected to the correct network
-      await provider.ready;
-
       const userAddress = await signer.getAddress();
-      // Upload file to IPFS (simplified)
-      const uploadResponse = await uploadToIPFS(contentData.file, userAddress);
+      console.log("User address:", userAddress);
 
-      console.log("CTR RESP", uploadResponse, "USER ADDRESS", userAddress);
-
-      if (!uploadResponse.cid) {
-        toast({ title: "Failed to upload file to IPFS" });
-        setLoading(false);
-        return;
+      // Network check and switch
+      const network = await provider.getNetwork();
+      console.log(
+        "Current network:",
+        network.name,
+        "Chain ID:",
+        network.chainId
+      );
+      if (network.chainId !== 421614) {
+        console.log(
+          "Current network is not Arbitrum Sepolia, attempting to switch..."
+        );
+        await switchToArbitrumSepolia(provider);
+        console.log("Network switch completed");
       }
 
-      // Create content on the blockchain
+      console.log("Uploading file to IPFS...");
+      const uploadResponse = await uploadToIPFS(contentData.file, userAddress);
+      if (!uploadResponse.cid) {
+        console.log("IPFS upload failed");
+        toast({ title: "Failed to upload file to IPFS" });
+        return;
+      }
+      console.log("File uploaded to IPFS. CID:", uploadResponse.cid);
+
+      // Blockchain interactions
+      console.log("Initializing contract interaction...");
       const contract = new ethers.Contract(
-        "0x809C9scf33B1CE2BF7daaD14ad1CD99C64eb5a179",
+        "0xB82946847Ea8b3AB5061ef6a00622980aD4dF957",
         ContractABI.abi,
         signer
       );
 
-      console.log("CTR", contract);
+      console.log("CONTRACT", contract);
 
-      const duration = 1000 * 60 * 60 * 24 * 365;
+      const code = await provider.getCode(userAddress);
+      console.log("CODE", code);
 
-      // Fix: Use ethers.utils.id to hash the role name
-      const CONTENT_CREATOR_ROLE = ethers.utils.id("CONTENT_CREATOR_ROLE");
-
-      const hasRole = await contract.hasRole(CONTENT_CREATOR_ROLE, userAddress);
-      if (!hasRole) {
-        // Fix: Pass the hashed role instead of a string
-        await contract.grantRole(CONTENT_CREATOR_ROLE, userAddress);
-      }
-
-      console.log("tx starts", contract);
-      const tx = await contract.createContent(
+      console.log("Creating content on blockchain...");
+      const createContentTx = await contract.createContent(
         ethers.utils.parseEther(contentData.priceETH),
-        parseInt(duration), // 1 year in milliseconds
         uploadResponse.cid,
         { gasLimit: 500000 }
       );
-      console.log("Transaction initiated:", tx);
-
-      console.log("Waiting for transaction receipt");
-      const receipt = await tx.wait();
-      console.log("Transaction receipt received:", receipt);
-
-      console.log("Searching for ContentCreated event");
+      const receipt = await createContentTx.wait();
       const event = receipt.events.find((e) => e.event === "ContentCreated");
-      console.log("Event found:", event);
-
       const tokenId = event.args.tokenId.toString();
-      console.log("Token ID extracted:", tokenId);
 
-      console.log("tx ends", tokenId, receipt);
-
-      // Save to database
+      console.log("Saving to database...");
       await saveToDatabase({
         creatorId: user.user.id,
         title: contentData.title,
@@ -250,19 +271,17 @@ const CreatorUpload = () => {
         tokenId,
         creatorAddress: userAddress,
       });
+      console.log("Saved to database successfully");
 
       toast({
         title: "Content Uploaded",
         description: "Your article has been successfully uploaded.",
       });
 
+      console.log("Upload process completed successfully");
       router.push("/");
     } catch (error) {
-      console.error("Error uploading content:");
-      console.error(error);
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error("Error uploading content:", error);
       toast({
         title: "Upload Failed",
         description:

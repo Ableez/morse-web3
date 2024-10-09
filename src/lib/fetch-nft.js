@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { getNFTSERVERONLY } from "./getnft_action";
 
 export async function getNFTs() {
   try {
@@ -9,7 +10,9 @@ export async function getNFTs() {
     if (!user) {
       return null;
     }
-    const res = await fetch(`http://localhost:3030/api/contents/nfts/${user}`);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND}/api/contents/nfts/${user}`
+    );
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
     }
@@ -28,7 +31,9 @@ export async function getNFTDetails(id) {
       return null;
     }
 
-    const res = await fetch(`http://localhost:3030/api/contents/detail/${id}`);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND}/api/contents/detail/${id}`
+    );
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
     }
@@ -38,3 +43,8 @@ export async function getNFTDetails(id) {
     console.error("ERROR FETCHING NFTS", error);
   }
 }
+
+export const fetchContent = async (cid) => {
+  const response = await getNFTSERVERONLY(cid);
+  return response;
+};

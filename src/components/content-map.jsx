@@ -7,6 +7,7 @@ import {
   Image as ImageIcon,
   DollarSign,
   Coins,
+  Loader2,
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
@@ -21,7 +22,7 @@ import {
 } from "@clerk/nextjs";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import ContractABI from "../../utils/transaction/AcademicMarketplace.json";
+import ContractABI from "../../utils/transaction/MorseAcademy.json";
 import { ethers } from "ethers";
 
 const getContentTypeIcon = (contentType) => {
@@ -44,8 +45,10 @@ export default function NFTDisplay(props) {
   const { toast } = useToast();
   const router = useRouter();
   const { user } = useUser();
+  const [loading, setLoading] = useState(false);
 
   const [ethPrice, setEthPrice] = useState(0);
+  const [contract, setContract] = useState(null);
 
   const fetchEthPrice = useCallback(async () => {
     try {
@@ -63,48 +66,104 @@ export default function NFTDisplay(props) {
 
   useEffect(() => {
     fetchEthPrice();
+    initializeContract();
   }, [fetchEthPrice]);
 
-  const rent = async (nft) => {
-    try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
+  const initializeContract = async () => {
+    if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-
-      const network = await provider.getNetwork();
-      if (network.chainId !== 421614) {
-        toast({
-          title: "Please connect your wallet to Arbitrum Sepolia testnet",
-        });
-        return;
-      }
-
-      const contract = new ethers.Contract(
-        "0x809C9cf33B1CE2BF7daaD14ad1CD99C64eb5a179",
+      const contractInstance = new ethers.Contract(
+        "0xB82946847Ea8b3AB5061ef6a00622980aD4dF957",
         ContractABI.abi,
         signer
       );
+      setContract(contractInstance);
+    }
+  };
 
-      console.log("CONTRACT", contract);
+  const switchToArbitrumSepolia = async (provider) => {
+    try {
+      console.log("Attempting to switch to Arbitrum Sepolia...");
+      await provider.send("wallet_switchEthereumChain", [
+        { chainId: "0x66eee" },
+      ]);
+      console.log("Successfully switched to Arbitrum Sepolia");
+    } catch (switchError) {
+      // This error code indicates that the chain has not been added to MetaMask.
+      if (switchError.code === 4902) {
+        console.log(
+          "Arbitrum Sepolia not found, attempting to add the network..."
+        );
+        try {
+          await provider.send("wallet_addEthereumChain", [
+            {
+              chainId: "0x66eee",
+              chainName: "Arbitrum Sepolia",
+              nativeCurrency: {
+                name: "Ethereum",
+                symbol: "ETH",
+                decimals: 18,
+              },
+              rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"],
+              blockExplorerUrls: ["https://sepolia.arbiscan.io"],
+            },
+          ]);
+          console.log("Arbitrum Sepolia network added successfully");
+        } catch (addError) {
+          console.error("Failed to add Arbitrum Sepolia network:", addError);
+          throw new Error("Failed to add Arbitrum Sepolia network");
+        }
+      } else {
+        console.error("Failed to switch to Arbitrum Sepolia:", switchError);
+        throw switchError;
+      }
+    }
+  };
 
-      const hasAccess = await contract.hasAccess(
-        nft.tokenId,
-        await signer.getAddress()
-      );
+  const buy = async (nft) => {
+    setLoading(true);
+    const { dismiss } = toast({
+      title: "Purchasing...",
+      description: "Please wait while we process your purchase.",
+      duration: 1000000000000,
+    });
 
+    try {
+      if (!contract) {
+        toast({ title: "Error", description: "Contract not initialized" });
+        return;
+      }
+
+      console.log("Requesting Ethereum accounts...");
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const userAddress = await signer.getAddress();
+      console.log("User address:", userAddress);
+
+      // Network check and switch
+      const network = await provider.getNetwork();
+      if (network.chainId !== 421614) {
+        console.log("Switching to Arbitrum Sepolia network...");
+        await switchToArbitrumSepolia(provider);
+        console.log("Successfully switched to Arbitrum Sepolia");
+      }
+
+      const hasAccess = await contract.hasAccess(nft.tokenId, userAddress);
       console.log("USER ACCESS", hasAccess);
 
       if (hasAccess) {
         toast({
-          title: "Accessed",
-          description: "Rent it now to get access to it!",
+          title: "Already Owned",
+          description: "You already have access to this content.",
         });
         return;
       }
 
-      console.log("PRICE", nft.price);
+      console.log("PRICE", nft.priceETH);
       const tx = await contract.purchaseAccess(nft.tokenId, {
-        value: ethers.utils.parseEther(nft.price.toString()),
+        value: ethers.utils.parseEther(nft.priceETH.toString()),
       });
 
       console.log("Transaction sent:", tx.hash);
@@ -113,7 +172,7 @@ export default function NFTDisplay(props) {
 
       // Update backend to reflect purchase
       const response = await fetch(
-        `http://localhost:3030/api/${nft.id}/purchase`,
+        `${process.env.NEXT_PUBLIC_BACKEND}/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
           headers: {
@@ -129,15 +188,52 @@ export default function NFTDisplay(props) {
         title: "Purchase Successful",
         description: "You have successfully purchased this NFT!",
       });
+
+      router.push("/view/" + nft.id);
     } catch (error) {
       console.error(error);
       toast({ title: "Error", description: error.message });
+    } finally {
+      setLoading(false);
+      dismiss();
     }
   };
 
+  // const getContentURI = async (tokenId) => {
+  //   try {
+  //     if (!contract) {
+  //       toast({ title: "Error", description: "Contract not initialized" });
+  //       return;
+  //     }
+  //     const contentURI = await contract.getContentURI(tokenId);
+  //     return contentURI;
+  //   } catch (error) {
+  //     console.error("Error fetching content URI:", error);
+  //     toast({ title: "Error", description: "Failed to fetch content URI" });
+  //   }
+  // };
+
+  // const revokeAccess = async (tokenId, userAddress) => {
+  //   try {
+  //     if (!contract) {
+  //       toast({ title: "Error", description: "Contract not initialized" });
+  //       return;
+  //     }
+  //     const tx = await contract.revokeAccess(tokenId, userAddress);
+  //     await tx.wait();
+  //     toast({
+  //       title: "Access Revoked",
+  //       description: "Access has been revoked successfully",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error revoking access:", error);
+  //     toast({ title: "Error", description: "Failed to revoke access" });
+  //   }
+  // };
+
   return (
     <div className="container mx-auto max-w-screen-lg p-4">
-      <h1 className="text-3xl font-bold mb-6">NFT Marketplace</h1>
+      <h1 className="text-3xl font-bold mb-6">Morse</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         {nfts.map((nft) => {
           const isOwned = user
@@ -172,12 +268,6 @@ export default function NFTDisplay(props) {
                   >
                     {nft.title}
                   </h2>
-                  <Badge
-                    variant={nft.isRentable ? "default" : "secondary"}
-                    className="scale-75"
-                  >
-                    {nft.isRentable ? "Rentable" : "Not Rentable"}
-                  </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                   {nft.description}
@@ -185,10 +275,7 @@ export default function NFTDisplay(props) {
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center space-x-1">
                     <DollarSign className="w-4 h-4" />
-                    <span className="font-semibold">
-                      {parseInt(parseFloat(nft.priceETH) * ethPrice).toFixed(2)}{" "}
-                      USD
-                    </span>
+                    <span className="font-semibold">{nft.priceUSD}</span>
                   </div>
                   <div className="flex items-center space-x-1 scale-75">
                     <Coins className="w-4 h-4" />
@@ -207,39 +294,37 @@ export default function NFTDisplay(props) {
                   >
                     {isOwned ? (
                       <Button
+                        disabled={loading}
                         className="w-full dark:bg-blue-500 dark:hover:bg-blue-500/80 dark:text-white"
                         onClick={() => router.push("/view/" + nft.id)}
                       >
+                        {loading && (
+                          <Loader2 width={14} className={"animate-spin"} />
+                        )}
                         View
                       </Button>
                     ) : (
-                      <div
-                        className={
-                          "flex align-middle place-items-center justify-between gap-2"
-                        }
+                      <Button
+                        disabled={loading}
+                        className="w-full"
+                        onClick={() => buy(nft)}
                       >
-                        {nft.isRentable && (
-                          <Button
-                            className="w-full"
-                            onClick={() => nft.isRentable && rent(nft)}
-                          >
-                            Rent Now
-                          </Button>
+                        {loading && (
+                          <Loader2 width={14} className={"animate-spin"} />
                         )}
-                        <Button
-                          className="w-full"
-                          // onClick={() => nft.isRentable && rent(nft)}
-                        >
-                          Buy Now
-                        </Button>
-                      </div>
+                        Buy Now
+                      </Button>
                     )}
                   </div>
                 </SignedIn>
 
                 <SignedOut>
                   <SignInWithMetamaskButton mode="modal">
-                    <Button variant="outline" className="w-full">
+                    <Button
+                      disabled={loading}
+                      variant="outline"
+                      className="w-full"
+                    >
                       <Image
                         width={20}
                         height={20}

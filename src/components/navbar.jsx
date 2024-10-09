@@ -3,9 +3,11 @@ import React, { useEffect } from "react";
 import { Button } from "./ui/button";
 import {
   CalendarIcon,
+  DoorOpen,
   EllipsisVertical,
   PersonStandingIcon,
   Upload,
+  User,
 } from "lucide-react";
 import ConnectWallet from "./connect-wallet";
 import Image from "next/image";
@@ -30,10 +32,11 @@ import {
   SignedIn,
   SignedOut,
   SignInWithMetamaskButton,
+  SignOutButton,
   UserButton,
   useUser,
 } from "@clerk/nextjs";
-import { Drawer, DrawerContent, DrawerTrigger } from "./ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from "./ui/drawer";
 
 const Navbar = () => {
   const [open, setOpen] = React.useState(false);
@@ -141,23 +144,57 @@ const Navbar = () => {
             </Button>
           </DrawerTrigger>
           <DrawerContent>
-            <div className={"px-2 py-4"}>
-              <SignedIn>
-                <div className={"md:hidden flex"}>
+            <div className={"px-2 py-8"}>
+              {/* <SignedIn asChild>
+                <div className={"md:hidden flex w-full"}>
                   <ConnectWallet />
                 </div>
-              </SignedIn>
+              </SignedIn> */}
 
               <SignedIn>
-                <Link href={"/upload"}>
-                  <Button
-                    className={"md:hidden flex w-full justify-start"}
-                    variant={"ghost"}
-                  >
-                    <Upload size={16} />
-                    Upload content
-                  </Button>
-                </Link>
+                <div className={"flex flex-col gap-1 w-full"}>
+                  <DrawerClose asChild>
+                    <Link href={"/upload"} className={""}>
+                      <Button
+                        className={
+                          "md:hidden flex w-full justify-start align-middle place-items-center gap-3 bg-blue-600"
+                        }
+                        variant={"ghost"}
+                      >
+                        <Upload size={16} />
+                        Upload content
+                      </Button>
+                    </Link>
+                  </DrawerClose>
+                  <DrawerClose asChild>
+                    <Link href={"/profile"}>
+                      <Button
+                        className={
+                          "md:hidden flex w-full justify-start align-middle place-items-center gap-3"
+                        }
+                        variant={"ghost"}
+                      >
+                        <User size={16} />
+                        My Contents
+                      </Button>
+                    </Link>
+                  </DrawerClose>
+
+                  <div className={"h-px w-full bg-neutral-700"} />
+                  <DrawerClose asChild>
+                    <SignOutButton className={"mt-4 w-full justify-start"}>
+                      <Button
+                        className={
+                          "md:hidden flex w-full justify-start align-middle place-items-center gap-2.5 text-red-600"
+                        }
+                        variant={"destructive"}
+                      >
+                        <DoorOpen size={16} className={"text-red-100 mr-3"} />
+                        Signout
+                      </Button>
+                    </SignOutButton>
+                  </DrawerClose>
+                </div>
               </SignedIn>
             </div>
           </DrawerContent>
