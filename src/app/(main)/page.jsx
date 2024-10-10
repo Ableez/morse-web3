@@ -11,7 +11,7 @@ export default async function Home() {
 }
 
 async function NFTList() {
-  const { nfts } = await getNFTs();
+  const nfts = await getNFTs();
 
   if (!nfts || nfts.length === 0) {
     return (

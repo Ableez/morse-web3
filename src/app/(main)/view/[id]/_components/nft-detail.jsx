@@ -97,10 +97,6 @@ const NFTDetails = ({ content, isCreator }) => {
           });
         } catch (error) {
           console.error("Failed to fetch access details:", error);
-          toast({
-            title: "Error",
-            description: "Failed to fetch access details",
-          });
         }
       }
     };
@@ -136,6 +132,8 @@ const NFTDetails = ({ content, isCreator }) => {
       // Use the Blob API to handle binary data correctly
       const blob = await resp.blob();
 
+      console.log("BLOB: ", blob);
+
       // Create a temporary URL for the blob
       const url = window.URL.createObjectURL(blob);
 
@@ -146,8 +144,7 @@ const NFTDetails = ({ content, isCreator }) => {
 
       // Set the file name
       // You might want to get the actual file name from the content metadata if available
-      const fileName =
-        content.title.replace(/\s+/g, "_") + getFileExtension(".pdf");
+      const fileName = content.title.replace(/\s+/g, "_") + ".pdf";
       a.download = fileName;
 
       // Append to the document, trigger the download, and clean up
@@ -250,7 +247,7 @@ const NFTDetails = ({ content, isCreator }) => {
         <div className="md:p-8 p-3">
           <div className="flex justify-between items-center mb-8">
             <Link
-              href="/user-page"
+              href="/"
               className="text-xs opacity-60 flex align-middle place-items-center justify-start"
             >
               <ArrowLeft size={16} className="inline-block mr-2" />

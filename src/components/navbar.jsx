@@ -185,7 +185,7 @@ const Navbar = () => {
                       <Link href={"/profile"}>
                         <Button
                           className={
-                            "flex w-full justify-start align-middle place-items-center gap-3"
+                            " w-full justify-start align-middle place-items-center gap-3 md:flex hidden"
                           }
                           variant={"ghost"}
                         >

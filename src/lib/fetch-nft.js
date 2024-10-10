@@ -1,50 +1,55 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { getNFTSERVERONLY } from "./getnft_action";
+import { db } from "@/db";
+import { contents } from "@/db/schema";
+import { desc, eq, not } from "drizzle-orm";
 
 export async function getNFTs() {
   try {
-    const user = auth().userId;
+    const { userId } = await currentUser();
 
-    const res = await fetch(
-      `${
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : process.env.BASE_URL
-      }/api/contents/all-nfts/${user || 'guest'}`
-    );
-    if (!res.ok) {
-      throw new Error("Failed to fetch NFTs");
+    if (!userId || userId === "guest") {
+      // Fetch all NFTs when there's no user or for guest users
+      const nfts = await db.query.contents.findMany({
+        with: {
+          accesses: true,
+          creator: true,
+        },
+        orderBy: [desc(contents.createdAt)],
+      });
+
+      return nfts;
     }
 
-    return res.json();
+    // Existing logic for authenticated users
+    const nfts = await db.query.contents.findMany({
+      where: not(eq(contents.creatorId, userId)),
+      with: {
+        accesses: true,
+        creator: true,
+      },
+    });
+
+    return nfts;
   } catch (error) {
-    console.error("ERROR FETCHING NFTS", error);
-    return { status: "error", message: "Failed to fetch NFTs", nfts: [] };
+    console.error("Error fetching NFTs:", error);
+    return null;
   }
 }
 
 export async function getNFTDetails(id) {
   try {
-    const user = auth().userId;
+    const content = await db.query.contents.findFirst({
+      where: eq(contents.id, id),
+      with: {
+        accesses: true,
+        creator: true,
+      },
+    });
 
-    if (!user) {
-      return null;
-    }
-
-    const res = await fetch(
-      `${
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : process.env.BASE_URL
-      }/api/contents/get-nft-info/${id}`
-    );
-    if (!res.ok) {
-      throw new Error("Failed to fetch NFTs");
-    }
-
-    return res.json();
+    return content;
   } catch (error) {
     console.error("ERROR FETCHING NFTS", error);
   }

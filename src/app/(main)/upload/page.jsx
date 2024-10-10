@@ -55,27 +55,28 @@ const CreatorUpload = () => {
   };
 
   const fetchEthPrice = useCallback(async () => {
-    const storedPrice = getStoredEthPrice();
-    if (storedPrice) {
-      setEthPrice(storedPrice);
-      return;
-    }
+    // const storedPrice = getStoredEthPrice();
+    // if (storedPrice) {
+    //   setEthPrice(storedPrice);
+    //   return;
+    // }
 
-    try {
-      const response = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
-        {
-          mode: "no-cors",
-        }
-      );
+    // try {
+    //   const response = await fetch(
+    //     "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+    //     {
+    //       mode: "no-cors",
+    //     }
+    //   );
 
-      const data = await response.json();
-      const newPrice = data.ethereum.usd || 2500;
-      setEthPrice(newPrice);
-      storeEthPrice(newPrice);
-    } catch (error) {
-      console.error("Failed to fetch ETH price:", error);
-    }
+    //   const data = await response.json();
+    //   const newPrice = data.ethereum.usd || 2500;
+    //   setEthPrice(newPrice);
+    // } catch (error) {
+    //   console.error("Failed to fetch ETH price:", error);
+    // }
+
+    storeEthPrice(2540);
   }, []);
 
   useEffect(() => {
@@ -155,8 +156,8 @@ const CreatorUpload = () => {
       });
 
       const data = new FormData();
-      data.append('file', new Blob([fileContent]), file.name);
-      data.append('ownerAddress', address);
+      data.append("file", new Blob([fileContent]), file.name);
+      data.append("ownerAddress", address);
 
       const resp = await fetch("/api/pinata", {
         method: "POST",
