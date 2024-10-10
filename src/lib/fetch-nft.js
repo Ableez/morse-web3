@@ -6,10 +6,8 @@ import { db } from "@/db";
 import { contents } from "@/db/schema";
 import { desc, eq, not } from "drizzle-orm";
 
-export async function getNFTs() {
+export async function getNFTs(userId) {
   try {
-    const { userId } = await currentUser();
-
     if (!userId || userId === "guest") {
       // Fetch all NFTs when there's no user or for guest users
       const nfts = await db.query.contents.findMany({
