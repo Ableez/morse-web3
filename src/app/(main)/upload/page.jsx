@@ -45,7 +45,7 @@ const CreatorUpload = () => {
       );
 
       const data = await response.json();
-      setEthPrice(data.ethereum.usd);
+      setEthPrice(data.ethereum.usd || 2500);
     } catch (error) {
       console.error("Failed to fetch ETH price:", error);
       toast({ title: "Failed to fetch ETH price. Please try again later." });
@@ -75,7 +75,8 @@ const CreatorUpload = () => {
     const { name, value } = e.target;
     setContentData((prev) => ({ ...prev, [name]: value }));
     if (name === "priceUSD") {
-      const priceETH = (parseFloat(value) / ethPrice).toFixed(6);
+      const priceETH =
+        Number(value) / (Number(ethPrice) === 0 ? 2500 : Number(ethPrice));
       setContentData((prev) => ({ ...prev, priceETH }));
     }
   };
@@ -259,6 +260,8 @@ const CreatorUpload = () => {
       console.log("CODE", code);
 
       console.log("Creating content on blockchain...");
+
+      console.log("ETS", ethers.utils.parseEther(contentData.priceETH));
       const createContentTx = await contract.createContent(
         ethers.utils.parseEther(contentData.priceETH),
         uploadResponse.cid,
