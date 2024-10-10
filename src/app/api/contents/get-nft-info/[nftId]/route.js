@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { contents } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { NextResponse } from "next/server";
+import { db } from "@/db";
+import { contents } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(request, { params }) {
   const { nftId } = params;
@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
   });
 
   if (!content) {
-    return NextResponse.json({ error: 'Content not found' }, { status: 404 });
+    return NextResponse.json({ error: "Content not found" }, { status: 404 });
   }
 
   return NextResponse.json(content);
