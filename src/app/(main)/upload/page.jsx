@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ethers } from "ethers";
 import ContractABI from "../../../../utils/transaction/MorseAcademy.json";
+import { BASE_URL } from "../../../../utils/base-url";
 
 const CreatorUpload = () => {
   const [contentData, setContentData] = useState({
@@ -125,17 +126,11 @@ const CreatorUpload = () => {
 
     console.log("DB DATA", data);
 
-    const resp = await fetch(
-      `${
-        process.env.NODE_ENV === "development"
-          && "http://localhost:3000"
-      }/api/contents/create`,
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-        mode: "no-cors",
-      }
-    );
+    const resp = await fetch(`${BASE_URL}/api/contents/create`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      mode: "no-cors",
+    });
 
     return await resp.json();
   };

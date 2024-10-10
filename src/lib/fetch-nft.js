@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { getNFTSERVERONLY } from "./getnft_action";
+import { BASE_URL } from "../../utils/base-url";
 
 export async function getNFTs() {
   try {
@@ -10,15 +11,9 @@ export async function getNFTs() {
     if (!user) {
       return null;
     }
-    const res = await fetch(
-      `${
-        process.env.NODE_ENV === "development"
-          && "http://localhost:3000"
-      }/api/contents/all-nfts/${user}`,
-      {
-        mode: "no-cors",
-      }
-    );
+    const res = await fetch(`${BASE_URL}/api/contents/all-nfts/${user}`, {
+      mode: "no-cors",
+    });
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
     }

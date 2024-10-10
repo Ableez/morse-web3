@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import ContractABI from "../../utils/transaction/MorseAcademy.json";
 import { ethers } from "ethers";
+import { BASE_URL } from "../../utils/base-url";
 
 const getContentTypeIcon = (contentType) => {
   switch (contentType) {
@@ -159,17 +160,11 @@ export default function NFTDisplay(props) {
           description: "You already have access to this content.",
         });
 
-        await fetch(
-          `${
-            process.env.NODE_ENV === "development"
-              && "http://localhost:3000"
-          }/api/contents/purchase/${nft.id}`,
-          {
-            method: "POST",
-            body: JSON.stringify({ userId: user.id }),
-            mode: "no-cors",
-          }
-        );
+        await fetch(`${BASE_URL}/api/contents/purchase/${nft.id}`, {
+          method: "POST",
+          body: JSON.stringify({ userId: user.id }),
+          mode: "no-cors",
+        });
 
         return;
       }
@@ -185,10 +180,7 @@ export default function NFTDisplay(props) {
 
       // Update backend to reflect purchase
       const response = await fetch(
-        `${
-          process.env.NODE_ENV === "development"
-            && "http://localhost:3000"
-        }/api/contents/purchase/${nft.id}`,
+        `${BASE_URL}/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
           body: JSON.stringify({ userId: user.id }),

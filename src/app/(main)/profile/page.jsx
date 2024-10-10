@@ -11,6 +11,7 @@ import Image from "next/image";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
+import { BASE_URL } from "../../../../utils/base-url";
 
 export default function UserProfile() {
   const { user } = useUser();
@@ -66,10 +67,7 @@ export default function UserProfile() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${
-          process.env.NODE_ENV === "development"
-            && "http://localhost:3000"
-        }/api/contents/get-user-nfts/${user.id}`,
+        `${BASE_URL}/api/contents/get-user-nfts/${user.id}`,
         {
           mode: "no-cors",
         }

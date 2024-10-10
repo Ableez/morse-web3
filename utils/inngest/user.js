@@ -1,3 +1,4 @@
+import { BASE_URL } from "../base-url";
 import { inngest } from "./client";
 
 // Function to handle user creation
@@ -13,21 +14,16 @@ export const createUserFunction = inngest.createFunction(
         profileImage: event.data.image_url || "",
         primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
-      const resp = await fetch(
-        `${
-          process.env.NODE_ENV === "development" && "http://localhost:3000"
-        }/api/user/create`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            id: event.data.id,
-            username: event.data.username,
-            email: event.data.email_addresses[0]?.email_address || "",
-            profileImage: event.data.image_url || "",
-            primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
-          }),
-        }
-      );
+      const resp = await fetch(`${BASE_URL}/api/user/create`, {
+        method: "POST",
+        body: JSON.stringify({
+          id: event.data.id,
+          username: event.data.username,
+          email: event.data.email_addresses[0]?.email_address || "",
+          profileImage: event.data.image_url || "",
+          primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
+        }),
+      });
 
       console.log("User created:", {
         status: "success",
@@ -50,9 +46,7 @@ export const updateUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${
-          process.env.NODE_ENV === "development" && "http://localhost:3000"
-        }/api/user/update/{event.data.id}`,
+        `${BASE_URL}/api/user/update/{event.data.id}`,
         {
           method: "PUT",
           body: JSON.stringify({
@@ -86,9 +80,7 @@ export const deleteUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${
-          process.env.NODE_ENV === "development" && "http://localhost:3000"
-        }/api/user/delete/${event.data.id}`,
+        `${BASE_URL}/api/user/delete/${event.data.id}`,
         {
           method: "DELETE",
         }
