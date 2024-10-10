@@ -15,7 +15,10 @@ export async function getNFTs() {
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000"
           : process.env.BASE_URL
-      }/api/contents/all-nfts/${user}`
+      }/api/contents/all-nfts/${user}`,
+      {
+        mode: "no-cors",
+      }
     );
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");

@@ -168,6 +168,7 @@ export default function NFTDisplay(props) {
           {
             method: "POST",
             body: JSON.stringify({ userId: user.id }),
+            mode: "no-cors",
           }
         );
 
@@ -193,6 +194,7 @@ export default function NFTDisplay(props) {
         {
           method: "POST",
           body: JSON.stringify({ userId: user.id }),
+          mode: "no-cors",
         }
       );
 

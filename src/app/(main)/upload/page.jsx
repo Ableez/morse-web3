@@ -132,6 +132,7 @@ const CreatorUpload = () => {
       {
         method: "POST",
         body: JSON.stringify(data),
+        mode: "no-cors",
       }
     );
 

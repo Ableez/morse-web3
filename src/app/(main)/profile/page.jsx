@@ -70,7 +70,10 @@ export default function UserProfile() {
           process.env.NODE_ENV === "development"
             ? "http://localhost:3000"
             : process.env.BASE_URL
-        }/api/contents/get-user-nfts/${user.id}`
+        }/api/contents/get-user-nfts/${user.id}`,
+        {
+          mode: "no-cors",
+        }
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user contents");
