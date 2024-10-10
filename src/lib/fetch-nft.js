@@ -10,13 +10,7 @@ export async function getNFTs(userId) {
   try {
     if (!userId || userId === "guest") {
       // Fetch all NFTs when there's no user or for guest users
-      const nfts = await db.query.contents.findMany({
-        with: {
-          accesses: true,
-          creator: true,
-        },
-        orderBy: [desc(contents.createdAt)],
-      });
+      const nfts = await db.select().from(contents);
 
       return nfts;
     }
