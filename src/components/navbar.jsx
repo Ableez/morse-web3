@@ -71,9 +71,9 @@ const Navbar = () => {
 
         <CommandDialog open={open} onOpenChange={setOpen}>
           <CommandInput placeholder="CMD K Type a command or search..." />
-          <CommandList>
+          <CommandList className={"max-w-screen-sm mx-auto"}>
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup heading="Suggestions">
+            {/* <CommandGroup heading="Suggestions">
               <CommandItem>
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 <span>Calendar</span>
@@ -104,7 +104,7 @@ const Navbar = () => {
                 <span>Settings</span>
                 <CommandShortcut>⌘S</CommandShortcut>
               </CommandItem>
-            </CommandGroup>
+            </CommandGroup> */}
           </CommandList>
         </CommandDialog>
 
@@ -179,6 +179,22 @@ const Navbar = () => {
                       </Button>
                     </Link>
                   </DrawerClose>
+
+                  <SignedIn>
+                    <DrawerClose asChild>
+                      <Link href={"/profile"}>
+                        <Button
+                          className={
+                            "flex w-full justify-start align-middle place-items-center gap-3"
+                          }
+                          variant={"ghost"}
+                        >
+                          <User size={16} />
+                          My Contents
+                        </Button>
+                      </Link>
+                    </DrawerClose>
+                  </SignedIn>
 
                   <div className={"h-px w-full bg-neutral-700"} />
                   <DrawerClose asChild>

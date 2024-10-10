@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { contents } from "@/db/schema";
-import { not, eq } from "drizzle-orm";
+import { not, eq, desc } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(request, { params }) {
@@ -20,6 +20,7 @@ export async function GET(request, { params }) {
         accesses: true,
         creator: true,
       },
+      orderBy: [desc(contents.createdAt)], // Add this line to sort by creation date in descending order
     });
 
     return NextResponse.json({ status: "success", nfts }, { status: 200 });

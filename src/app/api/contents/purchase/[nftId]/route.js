@@ -22,7 +22,7 @@ export async function POST(request, { params }) {
       })
       .returning();
 
-    return newAccess[0];
+    return NextResponse.json({ nft: newAccess[0] });
   } catch (error) {
     console.error("Error fetching NFT:", error);
     return NextResponse.json(

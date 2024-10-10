@@ -58,5 +58,6 @@ export async function getNFTDetails(id) {
 
 export const fetchContent = async (cid) => {
   const response = await getNFTSERVERONLY(cid);
+  console.log(response);
   return response;
 };
