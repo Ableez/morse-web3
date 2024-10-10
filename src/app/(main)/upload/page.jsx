@@ -75,8 +75,9 @@ const CreatorUpload = () => {
     const { name, value } = e.target;
     setContentData((prev) => ({ ...prev, [name]: value }));
     if (name === "priceUSD") {
-      const priceETH =
-        Number(value) / (Number(ethPrice) === 0 ? 2500 : Number(ethPrice));
+      const priceETH = (
+        Number(value) / (Number(ethPrice) === 0 ? 2500 : Number(ethPrice))
+      ).toString();
       setContentData((prev) => ({ ...prev, priceETH }));
     }
   };
@@ -260,10 +261,11 @@ const CreatorUpload = () => {
       console.log("CODE", code);
 
       console.log("Creating content on blockchain...");
+      const priceETHString = Number(contentData.priceETH).toFixed(18);
+      console.log("Price in ETH (string):", priceETHString);
 
-      console.log("ETS", ethers.utils.parseEther(contentData.priceETH));
       const createContentTx = await contract.createContent(
-        ethers.utils.parseEther(contentData.priceETH.toString()),
+        ethers.utils.parseEther(priceETHString),
         uploadResponse.cid,
         { gasLimit: 500000 }
       );
