@@ -38,7 +38,10 @@ const CreatorUpload = () => {
   const fetchEthPrice = useCallback(async () => {
     try {
       const response = await fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
+        {
+          mode: "no-cors",
+        }
       );
 
       const data = await response.json();
@@ -118,13 +121,19 @@ const CreatorUpload = () => {
   const saveToDatabase = async (data) => {
     // Implement database save logic
 
-    const resp = await fetch(`https://morse-backend.vercel.app/api/contents`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    console.log("DB DATA", data);
+
+    const resp = await fetch(
+      `${
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : process.env.BASE_URL
+      }/api/contents/create`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    );
 
     return await resp.json();
   };
@@ -290,7 +299,7 @@ const CreatorUpload = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-2">
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">

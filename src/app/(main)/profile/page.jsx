@@ -66,7 +66,11 @@ export default function UserProfile() {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://morse-backend.vercel.app/api/contents/get-user-nfts/${user.id}`
+        `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : process.env.BASE_URL
+        }/api/contents/get-user-nfts/${user.id}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch user contents");
@@ -74,7 +78,7 @@ export default function UserProfile() {
       const data = await response.json();
 
       console.log("DATA", data);
-      setContents(data);
+      setContents(data.nfts);
     } catch (error) {
       console.error("Error fetching user contents:", error);
       toast({
@@ -110,7 +114,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-1">
       <Card className="max-w-4xl mx-auto">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">User Profile</CardTitle>

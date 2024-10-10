@@ -143,7 +143,7 @@ const Navbar = () => {
               <EllipsisVertical size={18} />
             </Button>
           </DrawerTrigger>
-          <DrawerContent>
+          <DrawerContent className={"max-w-screen-sm mx-auto"}>
             <div className={"px-2 py-8"}>
               {/* <SignedIn asChild>
                 <div className={"md:hidden flex w-full"}>
@@ -157,7 +157,7 @@ const Navbar = () => {
                     <Link href={"/upload"} className={""}>
                       <Button
                         className={
-                          "md:hidden flex w-full justify-start align-middle place-items-center gap-3 bg-blue-600"
+                          "md:hidden flex w-full justify-start align-middle place-items-center gap-3 bg-blue-600/10"
                         }
                         variant={"ghost"}
                       >
@@ -185,9 +185,9 @@ const Navbar = () => {
                     <SignOutButton className={"mt-4 w-full justify-start"}>
                       <Button
                         className={
-                          "md:hidden flex w-full justify-start align-middle place-items-center gap-2.5 text-red-600"
+                          "md:hidden flex w-full justify-start align-middle place-items-center gap-2.5 bg-red-600/20 text-red-600"
                         }
-                        variant={"destructive"}
+                        variant={"ghost"}
                       >
                         <DoorOpen size={16} className={"text-red-100 mr-3"} />
                         Signout

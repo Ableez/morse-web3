@@ -172,12 +172,13 @@ export default function NFTDisplay(props) {
 
       // Update backend to reflect purchase
       const response = await fetch(
-        `https://morse-backend.vercel.app/api/contents/purchase/${nft.id}`,
+        `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : process.env.BASE_URL
+        }/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
           body: JSON.stringify({ userId: user.id }),
         }
       );
@@ -231,11 +232,16 @@ export default function NFTDisplay(props) {
   //   }
   // };
 
+  console.log("NFTS", nfts);
+
+  if (!nfts) {
+    return "No NFTs";
+  }
   return (
     <div className="container mx-auto max-w-screen-lg p-4">
       <h1 className="text-3xl font-bold mb-6">Morse</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-        {nfts.map((nft) => {
+        {nfts?.map((nft) => {
           const isOwned = user
             ? nft.accesses.find((n) => n.userId === user.id)
             : false;

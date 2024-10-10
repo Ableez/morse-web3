@@ -11,7 +11,11 @@ export async function getNFTs() {
       return null;
     }
     const res = await fetch(
-      `https://morse-backend.vercel.app/api/contents/nfts/${user}`
+      `${
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : process.env.BASE_URL
+      }/api/contents/all-nfts/${user}`
     );
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
@@ -31,9 +35,7 @@ export async function getNFTDetails(id) {
       return null;
     }
 
-    const res = await fetch(
-      `https://morse-backend.vercel.app/api/contents/detail/${id}`
-    );
+    const res = await fetch(`api/contents/get-nft-info/${id}`);
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
     }

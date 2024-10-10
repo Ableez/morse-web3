@@ -1,13 +1,13 @@
 /** @type { import("drizzle-kit").Config } */
 
 const cfg = {
-  schema: "./src/server/db/schema.js",
+  schema: "./src/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  tablesFilter: ["weirdgee_*"],
-  out: "/drizzle",
+  tablesFilter: ["morseacad_*"],
+  out: "./drizzle",
 };
 
 export default cfg;

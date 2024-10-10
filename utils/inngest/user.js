@@ -14,12 +14,13 @@ export const createUserFunction = inngest.createFunction(
         primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
       const resp = await fetch(
-        `https://morse-backend.vercel.app/api/users/create`,
+        `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : process.env.BASE_URL
+        }/api/user/create`,
         {
           method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
           body: JSON.stringify({
             id: event.data.id,
             username: event.data.username,
@@ -51,12 +52,13 @@ export const updateUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `https://morse-backend.vercel.app/api/users/update/${event.data.id}`,
+        `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : process.env.BASE_URL
+        }/api/user/update/{event.data.id}`,
         {
           method: "PUT",
-          headers: {
-            "content-type": "application/json",
-          },
           body: JSON.stringify({
             username: event.data.username,
             email: event.data.email_addresses[0].email_address,
@@ -88,7 +90,11 @@ export const deleteUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `https://morse-backend.vercel.app/api/users/delete/${event.data.id}`,
+        `${
+          process.env.NODE_ENV === "development"
+            ? "http://localhost:3000"
+            : process.env.BASE_URL
+        }/api/user/delete/${event.data.id}`,
         {
           method: "DELETE",
         }
