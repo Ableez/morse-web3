@@ -67,7 +67,7 @@ export default function UserProfile() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/contents/get-user-nfts/${user.id}`,
+        `${BASE_URL || ""}/api/contents/get-user-nfts/${user.id}`,
         {
           mode: "no-cors",
         }

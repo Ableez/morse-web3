@@ -126,7 +126,7 @@ const CreatorUpload = () => {
 
     console.log("DB DATA", data);
 
-    const resp = await fetch(`${BASE_URL}/api/contents/create`, {
+    const resp = await fetch(`${BASE_URL || ""}/api/contents/create`, {
       method: "POST",
       body: JSON.stringify(data),
       mode: "no-cors",

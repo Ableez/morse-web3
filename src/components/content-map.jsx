@@ -160,7 +160,7 @@ export default function NFTDisplay(props) {
           description: "You already have access to this content.",
         });
 
-        await fetch(`${BASE_URL}/api/contents/purchase/${nft.id}`, {
+        await fetch(`${BASE_URL || ""}/api/contents/purchase/${nft.id}`, {
           method: "POST",
           body: JSON.stringify({ userId: user.id }),
           mode: "no-cors",
@@ -180,7 +180,7 @@ export default function NFTDisplay(props) {
 
       // Update backend to reflect purchase
       const response = await fetch(
-        `${BASE_URL}/api/contents/purchase/${nft.id}`,
+        `${BASE_URL || ""}/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
           body: JSON.stringify({ userId: user.id }),

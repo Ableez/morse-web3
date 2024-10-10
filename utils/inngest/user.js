@@ -14,7 +14,7 @@ export const createUserFunction = inngest.createFunction(
         profileImage: event.data.image_url || "",
         primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
-      const resp = await fetch(`${BASE_URL}/api/user/create`, {
+      const resp = await fetch(`${BASE_URL || ""}/api/user/create`, {
         method: "POST",
         body: JSON.stringify({
           id: event.data.id,
@@ -46,7 +46,7 @@ export const updateUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/user/update/{event.data.id}`,
+        `${BASE_URL || ""}/api/user/update/{event.data.id}`,
         {
           method: "PUT",
           body: JSON.stringify({
@@ -80,7 +80,7 @@ export const deleteUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/user/delete/${event.data.id}`,
+        `${BASE_URL || ""}/api/user/delete/${event.data.id}`,
         {
           method: "DELETE",
         }
