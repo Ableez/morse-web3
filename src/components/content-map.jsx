@@ -158,6 +158,19 @@ export default function NFTDisplay(props) {
           title: "Already Owned",
           description: "You already have access to this content.",
         });
+
+        await fetch(
+          `${
+            process.env.NODE_ENV === "development"
+              ? "http://localhost:3000"
+              : process.env.BASE_URL
+          }/api/contents/purchase/${nft.id}`,
+          {
+            method: "POST",
+            body: JSON.stringify({ userId: user.id }),
+          }
+        );
+
         return;
       }
 
@@ -199,40 +212,6 @@ export default function NFTDisplay(props) {
       dismiss();
     }
   };
-
-  // const getContentURI = async (tokenId) => {
-  //   try {
-  //     if (!contract) {
-  //       toast({ title: "Error", description: "Contract not initialized" });
-  //       return;
-  //     }
-  //     const contentURI = await contract.getContentURI(tokenId);
-  //     return contentURI;
-  //   } catch (error) {
-  //     console.error("Error fetching content URI:", error);
-  //     toast({ title: "Error", description: "Failed to fetch content URI" });
-  //   }
-  // };
-
-  // const revokeAccess = async (tokenId, userAddress) => {
-  //   try {
-  //     if (!contract) {
-  //       toast({ title: "Error", description: "Contract not initialized" });
-  //       return;
-  //     }
-  //     const tx = await contract.revokeAccess(tokenId, userAddress);
-  //     await tx.wait();
-  //     toast({
-  //       title: "Access Revoked",
-  //       description: "Access has been revoked successfully",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error revoking access:", error);
-  //     toast({ title: "Error", description: "Failed to revoke access" });
-  //   }
-  // };
-
-  console.log("NFTS", nfts);
 
   if (!nfts) {
     return "No NFTs";

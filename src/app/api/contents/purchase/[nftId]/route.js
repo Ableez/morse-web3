@@ -1,15 +1,14 @@
 import { db } from "@/db";
-import { contents } from "@/db/schema";
+import { contentAccess, contents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(request, { params }) {
   try {
+    const { nftId } = params;
+    const id = nftId;
+    const { userId } = await request.json();
     const content = await db.select().from(contents).where(eq(contents.id, id));
-
-    if (!content[0]) {
-      return { data: null, message: "Content not found" };
-    }
 
     if (!content[0]) throw new Error("Content not found");
 
@@ -18,7 +17,7 @@ export async function POST(request, { params }) {
       .values({
         id: crypto.randomUUID(),
         contentId: id,
-        userId: body.userId,
+        userId: userId,
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
       })
       .returning();
