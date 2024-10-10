@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import {
   SignedIn,
   SignedOut,
@@ -39,6 +40,11 @@ const getContentTypeIcon = (contentType) => {
     default:
       return <FileText className="w-5 text-orange-500 h-5" />;
   }
+};
+
+const cardVariants = {
+  initial: { scale: 0.95, opacity: 0 },
+  in: { scale: 1, opacity: 1 },
 };
 
 export default function NFTDisplay(props) {
@@ -212,109 +218,115 @@ export default function NFTDisplay(props) {
     <div className="container mx-auto max-w-screen-lg p-4">
       <h1 className="text-3xl font-bold mb-6">Morse</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
-        {nfts?.map((nft) => {
+        {nfts?.map((nft, idx) => {
           const isOwned = user
             ? nft.accesses.find((n) => n.userId === user.id)
             : false;
 
           return (
-            <Card key={nft.id} className="overflow-hidden grid">
-              <div className="relative aspect-video">
-                <Image
-                  src={nft.coverImage || "/placeholder.svg"}
-                  alt={nft.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover rounded-t-lg"
-                />
-                <div className="absolute top-2 right-2 bg-background/60 rounded-full p-1">
-                  {getContentTypeIcon(nft.contentType)}
-                </div>
+            <motion.div
+              key={nft.id}
+              variants={cardVariants}
+              transition={{ duration: 0.5, delay: 0.2 * idx }}
+            >
+              <Card className="overflow-hidden grid">
+                <div className="relative aspect-video">
+                  <Image
+                    src={nft.coverImage || "/placeholder.svg"}
+                    alt={nft.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover rounded-t-lg"
+                  />
+                  <div className="absolute top-2 right-2 bg-background/60 rounded-full p-1">
+                    {getContentTypeIcon(nft.contentType)}
+                  </div>
 
-                {isOwned && (
-                  <div className="absolute top-2 left-2 bg-blue-500 rounded-full py-1 px-2 text-xs font-bold">
-                    Owned
-                  </div>
-                )}
-              </div>
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h2
-                    className="text-base font-semibold line-clamp-1"
-                    title={nft.title}
-                  >
-                    {nft.title}
-                  </h2>
+                  {isOwned && (
+                    <div className="absolute top-2 left-2 bg-blue-500 rounded-full py-1 px-2 text-xs font-bold">
+                      Owned
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                  {nft.description}
-                </p>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-1">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="font-semibold">{nft.priceUSD}</span>
-                  </div>
-                  <div className="flex items-center space-x-1 scale-75">
-                    <Coins className="w-4 h-4" />
-                    <span className="font-semibold">
-                      {parseFloat(nft.priceETH)} ETH
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0">
-                <SignedIn>
-                  <div
-                    className={
-                      "w-full flex align-middle place-items-center justify-center gap-2"
-                    }
-                  >
-                    {isOwned ? (
-                      <Button
-                        disabled={loading}
-                        className="w-full dark:bg-blue-500 dark:hover:bg-blue-500/80 dark:text-white"
-                        onClick={() => router.push("/view/" + nft.id)}
-                      >
-                        {loading && (
-                          <Loader2 width={14} className={"animate-spin"} />
-                        )}
-                        View
-                      </Button>
-                    ) : (
-                      <Button
-                        disabled={loading}
-                        className="w-full"
-                        onClick={() => buy(nft)}
-                      >
-                        {loading && (
-                          <Loader2 width={14} className={"animate-spin"} />
-                        )}
-                        Buy Now
-                      </Button>
-                    )}
-                  </div>
-                </SignedIn>
-
-                <SignedOut>
-                  <SignInWithMetamaskButton mode="modal">
-                    <Button
-                      disabled={loading}
-                      variant="outline"
-                      className="w-full"
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h2
+                      className="text-base font-semibold line-clamp-1"
+                      title={nft.title}
                     >
-                      <Image
-                        width={20}
-                        height={20}
-                        src="/metamask.svg"
-                        alt="Metamask"
-                        className="mr-2"
-                      />
-                      Connect Wallet
-                    </Button>
-                  </SignInWithMetamaskButton>
-                </SignedOut>
-              </CardFooter>
-            </Card>
+                      {nft.title}
+                    </h2>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                    {nft.description}
+                  </p>
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center space-x-1">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="font-semibold">{nft.priceUSD}</span>
+                    </div>
+                    <div className="flex items-center space-x-1 scale-75">
+                      <Coins className="w-4 h-4" />
+                      <span className="font-semibold">
+                        {parseFloat(nft.priceETH)} ETH
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <SignedIn>
+                    <div
+                      className={
+                        "w-full flex align-middle place-items-center justify-center gap-2"
+                      }
+                    >
+                      {isOwned ? (
+                        <Button
+                          disabled={loading}
+                          className="w-full dark:bg-blue-500 dark:hover:bg-blue-500/80 dark:text-white"
+                          onClick={() => router.push("/view/" + nft.id)}
+                        >
+                          {loading && (
+                            <Loader2 width={14} className={"animate-spin"} />
+                          )}
+                          View
+                        </Button>
+                      ) : (
+                        <Button
+                          disabled={loading}
+                          className="w-full"
+                          onClick={() => buy(nft)}
+                        >
+                          {loading && (
+                            <Loader2 width={14} className={"animate-spin"} />
+                          )}
+                          Buy Now
+                        </Button>
+                      )}
+                    </div>
+                  </SignedIn>
+
+                  <SignedOut>
+                    <SignInWithMetamaskButton mode="modal">
+                      <Button
+                        disabled={loading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Image
+                          width={20}
+                          height={20}
+                          src="/metamask.svg"
+                          alt="Metamask"
+                          className="mr-2"
+                        />
+                        Connect Wallet
+                      </Button>
+                    </SignInWithMetamaskButton>
+                  </SignedOut>
+                </CardFooter>
+              </Card>
+            </motion.div>
           );
         })}
       </div>

@@ -18,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata = {
-  title: "Academic Marketplace",
-  description: "A decentralized marketplace for academic content.",
+  title: "Morse | Academy",
+  description: "A decentralized marketplace for special contents.",
   icons: [{ rel: "icon", url: "/favi.png" }],
 };
 

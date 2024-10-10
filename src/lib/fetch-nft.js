@@ -7,19 +7,12 @@ export async function getNFTs() {
   try {
     const user = auth().userId;
 
-    if (!user) {
-      return null;
-    }
-
     const res = await fetch(
       `${
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000"
           : process.env.BASE_URL
-      }/api/contents/all-nfts/${user}`,
-      {
-        mode: "no-cors",
-      }
+      }/api/contents/all-nfts/${user || 'guest'}`
     );
     if (!res.ok) {
       throw new Error("Failed to fetch NFTs");
@@ -28,6 +21,7 @@ export async function getNFTs() {
     return res.json();
   } catch (error) {
     console.error("ERROR FETCHING NFTS", error);
+    return { status: "error", message: "Failed to fetch NFTs", nfts: [] };
   }
 }
 
@@ -58,5 +52,6 @@ export async function getNFTDetails(id) {
 
 export const fetchContent = async (cid) => {
   const response = await getNFTSERVERONLY(cid);
+  console.log(response);
   return response;
 };

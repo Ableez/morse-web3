@@ -186,7 +186,10 @@ export default function UserProfile() {
                   </div>
                 ) : (
                   contents.map((nft) => (
-                    <Card key={nft.id} className="overflow-hidden">
+                    <Card
+                      key={nft.id}
+                      className="overflow-hidden hover:scale-[1.01] duration-200"
+                    >
                       <CardContent className="p-4">
                         <div className="aspect-square relative mb-2">
                           <Image

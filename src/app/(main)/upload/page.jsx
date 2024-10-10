@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "@/components/ui/tooltip";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import ContractABI from "../../../../utils/transaction/MorseAcademy.json";
 import { BASE_URL } from "../../../../utils/base-url";
 
@@ -31,12 +31,36 @@ const CreatorUpload = () => {
   });
   const [loading, setLoading] = useState(false);
   const [ethPrice, setEthPrice] = useState(0);
-  const [estimatedGas, setEstimatedGas] = useState(null);
+  const [estimatedGas, setEstimatedGas] = useState(0);
+  const [estimatedGasLimit, setEstimatedGasLimit] = useState(0);
   const { toast } = useToast();
   const user = useUser();
   const router = useRouter();
 
+  const getStoredEthPrice = () => {
+    const storedData = localStorage.getItem("ethPriceData");
+    if (storedData) {
+      const { price, timestamp } = JSON.parse(storedData);
+      if (Date.now() - timestamp < 5000) {
+        // 5 seconds
+        return price;
+      }
+    }
+    return null;
+  };
+
+  const storeEthPrice = (price) => {
+    const data = { price, timestamp: Date.now() };
+    localStorage.setItem("ethPriceData", JSON.stringify(data));
+  };
+
   const fetchEthPrice = useCallback(async () => {
+    const storedPrice = getStoredEthPrice();
+    if (storedPrice) {
+      setEthPrice(storedPrice);
+      return;
+    }
+
     try {
       const response = await fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
@@ -46,25 +70,49 @@ const CreatorUpload = () => {
       );
 
       const data = await response.json();
-      setEthPrice(data.ethereum.usd || 2500);
+      const newPrice = data.ethereum.usd || 2500;
+      setEthPrice(newPrice);
+      storeEthPrice(newPrice);
     } catch (error) {
       console.error("Failed to fetch ETH price:", error);
-      toast({ title: "Failed to fetch ETH price. Please try again later." });
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchEthPrice();
     estimateGasFee();
+
+    // Set up an interval to fetch the price every 5 seconds
+    const interval = setInterval(fetchEthPrice, 5000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
   }, [fetchEthPrice]);
 
   const estimateGasFee = async () => {
     try {
       if (typeof window.ethereum !== "undefined") {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(
+          "0xB82946847Ea8b3AB5061ef6a00622980aD4dF957",
+          ContractABI.abi,
+          signer
+        );
+
+        // Estimate gas limit for createContent function
+        const estimatedGas = await contract.estimateGas.createContent(
+          ethers.utils.parseEther("0.01"), // Use a dummy value for estimation
+          "QmDummyCID" // Use a dummy CID for estimation
+        );
+
+        // Add a buffer to the estimated gas (e.g., 20% more)
+        const gasLimitWithBuffer = estimatedGas.mul(120).div(100);
+
+        setEstimatedGasLimit(gasLimitWithBuffer.toString());
+
         const gasPrice = await provider.getGasPrice();
-        const estimatedGasLimit = 500000; // This is an estimate, adjust as needed
-        const estimatedGasFee = gasPrice.mul(estimatedGasLimit);
+        const estimatedGasFee = gasPrice.mul(gasLimitWithBuffer);
         setEstimatedGas(ethers.utils.formatEther(estimatedGasFee));
       }
     } catch (error) {
@@ -99,23 +147,32 @@ const CreatorUpload = () => {
     });
 
     try {
-      const data = new FormData();
+      const reader = new FileReader();
+      const fileContent = await new Promise((resolve, reject) => {
+        reader.onload = (event) => resolve(event.target.result);
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+      });
 
-      data.set("file", file);
-      data.set("ownerAddress", address);
+      const data = new FormData();
+      data.append('file', new Blob([fileContent]), file.name);
+      data.append('ownerAddress', address);
 
       const resp = await fetch("/api/pinata", {
         method: "POST",
         body: data,
       });
 
+      if (!resp.ok) {
+        throw new Error(`HTTP error! status: ${resp.status}`);
+      }
+
       const uploadData = await resp.json();
-
       console.log("RETURNING", { cid: uploadData.IpfsHash });
-
       return { cid: uploadData.IpfsHash };
     } catch (err) {
-      console.error(err);
+      console.error("Error uploading to IPFS:", err);
+      throw err;
     } finally {
       dismiss();
     }
@@ -261,7 +318,7 @@ const CreatorUpload = () => {
       const createContentTx = await contract.createContent(
         ethers.utils.parseEther(priceETHString),
         uploadResponse.cid,
-        { gasLimit: 500000 }
+        { gasLimit: BigNumber.from(estimatedGasLimit) }
       );
       const receipt = await createContentTx.wait();
       const event = receipt.events.find((e) => e.event === "ContentCreated");

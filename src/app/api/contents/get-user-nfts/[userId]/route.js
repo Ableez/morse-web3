@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/index";
 import { contents } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export async function GET(request, { params }) {
   try {
@@ -20,6 +20,7 @@ export async function GET(request, { params }) {
         accesses: true,
         creator: true,
       },
+      orderBy: desc(contents.createdAt),
     });
 
     return NextResponse.json(
