@@ -28,7 +28,6 @@ export const createUserFunction = inngest.createFunction(
             profileImage: event.data.image_url || "",
             primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
           }),
-          mode: "no-cors",
         }
       );
 
@@ -65,7 +64,6 @@ export const updateUserFunction = inngest.createFunction(
             email: event.data.email_addresses[0].email_address,
             profileImage: event.data.image_url,
           }),
-          mode: "no-cors",
         }
       );
 
@@ -99,7 +97,6 @@ export const deleteUserFunction = inngest.createFunction(
         }/api/user/delete/${event.data.id}`,
         {
           method: "DELETE",
-          mode: "no-cors",
         }
       );
 
