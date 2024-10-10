@@ -27,7 +27,6 @@ export async function GET(request, { params }) {
         accesses: true,
         creator: true,
       },
-      orderBy: [desc(contents.createdAt)],
     });
 
     return NextResponse.json({ status: "success", nfts }, { status: 200 });
