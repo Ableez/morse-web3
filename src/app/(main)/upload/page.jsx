@@ -128,8 +128,7 @@ const CreatorUpload = () => {
     const resp = await fetch(
       `${
         process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : process.env.BASE_URL
+          && "http://localhost:3000"
       }/api/contents/create`,
       {
         method: "POST",

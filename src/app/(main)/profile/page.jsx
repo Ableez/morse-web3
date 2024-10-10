@@ -68,8 +68,7 @@ export default function UserProfile() {
       const response = await fetch(
         `${
           process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : process.env.BASE_URL
+            && "http://localhost:3000"
         }/api/contents/get-user-nfts/${user.id}`,
         {
           mode: "no-cors",

@@ -15,9 +15,7 @@ export const createUserFunction = inngest.createFunction(
       });
       const resp = await fetch(
         `${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : process.env.BASE_URL
+          process.env.NODE_ENV === "development" && "http://localhost:3000"
         }/api/user/create`,
         {
           method: "POST",
@@ -53,9 +51,7 @@ export const updateUserFunction = inngest.createFunction(
     try {
       const response = await fetch(
         `${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : process.env.BASE_URL
+          process.env.NODE_ENV === "development" && "http://localhost:3000"
         }/api/user/update/{event.data.id}`,
         {
           method: "PUT",
@@ -91,9 +87,7 @@ export const deleteUserFunction = inngest.createFunction(
     try {
       const response = await fetch(
         `${
-          process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : process.env.BASE_URL
+          process.env.NODE_ENV === "development" && "http://localhost:3000"
         }/api/user/delete/${event.data.id}`,
         {
           method: "DELETE",

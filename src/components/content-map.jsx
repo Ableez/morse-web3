@@ -162,8 +162,7 @@ export default function NFTDisplay(props) {
         await fetch(
           `${
             process.env.NODE_ENV === "development"
-              ? "http://localhost:3000"
-              : process.env.BASE_URL
+              && "http://localhost:3000"
           }/api/contents/purchase/${nft.id}`,
           {
             method: "POST",
@@ -188,8 +187,7 @@ export default function NFTDisplay(props) {
       const response = await fetch(
         `${
           process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : process.env.BASE_URL
+            && "http://localhost:3000"
         }/api/contents/purchase/${nft.id}`,
         {
           method: "POST",
