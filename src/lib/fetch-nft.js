@@ -10,6 +10,7 @@ export async function getNFTs() {
     if (!user) {
       return null;
     }
+
     const res = await fetch(
       `${
         process.env.NODE_ENV === "development"
