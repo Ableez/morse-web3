@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import NFTDisplay from "@/components/content-map";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { getNFTs } from "@/lib/get-home-nfts";
 
 export default async function Home() {
@@ -12,8 +12,11 @@ export default async function Home() {
 }
 
 async function NFTList() {
-  const { userId } = await currentUser();
-  const nfts = await getNFTs(userId ?? "guest");
+  const user = await auth();
+
+  console.log("USER: ", user);
+
+  const nfts = await getNFTs(user?.userId ?? "guest");
 
   if (!nfts || nfts.length === 0) {
     return (
