@@ -46,7 +46,7 @@ export const updateUserFunction = inngest.createFunction(
 
     try {
       const response = await fetch(
-        `${BASE_URL || ""}/api/user/update/{event.data.id}`,
+        `${BASE_URL || ""}/api/user/update/${event.data.id}`,
         {
           method: "PUT",
           body: JSON.stringify({
