@@ -1,6 +1,9 @@
 import { createUser } from "@/lib/create-user-action";
-import { BASE_URL } from "../base-url";
 import { inngest } from "./client";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { updateUser } from "@/lib/update-user-action";
 
 // Function to handle user creation
 export const createUserFunction = inngest.createFunction(
@@ -8,14 +11,6 @@ export const createUserFunction = inngest.createFunction(
   { event: "morse/user.created" },
   async ({ event }) => {
     try {
-      console.log({
-        id: event.data.id,
-        username: event.data.username,
-        email: event.data.email_addresses[0]?.email_address || "",
-        profileImage: event.data.image_url || "",
-        primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
-      });
-
       const created = await createUser({
         id: event.data.id,
         username: event.data.username,
@@ -28,7 +23,8 @@ export const createUserFunction = inngest.createFunction(
         status: "success",
         user: created,
       });
-      // return
+
+      return created;
     } catch (error) {
       console.error("Error creating user:", error);
       return { status: "error", message: "Failed to create user" };
@@ -48,10 +44,11 @@ export const updateUserFunction = inngest.createFunction(
         username: event.data.username,
         email: event.data.email_addresses[0].email_address,
         profileImage: event.data.image_url,
+        walletAddress: event.data.primary_web3_wallet_id,
       });
 
       if (!updated) {
-        throw new Error("User not found");
+        return { status: "error", message: "User not found" };
       }
 
       console.log("User updated:", updated);
@@ -71,20 +68,14 @@ export const deleteUserFunction = inngest.createFunction(
     console.log("User deletion event received:", event);
 
     try {
-      const response = await fetch(
-        `${BASE_URL || ""}/api/user/delete/${event.data.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await db
+        .delete(users)
+        .where(eq(users.id, event.data.id));
 
-      if (!response.ok) {
-        throw new Error(`Failed to delete user: ${response.statusText}`);
-      }
+      console.log("User deletion response:", response);
 
-      const result = await response.json();
-      console.log("User deleted:", result);
-      return result;
+      console.log("User deleted:", response);
+      return response;
     } catch (error) {
       console.error("Error deleting user:", error);
       throw error;
@@ -93,5 +84,8 @@ export const deleteUserFunction = inngest.createFunction(
 );
 
 // Export all functions
-const funcs = [createUserFunction, updateUserFunction, deleteUserFunction];
-export default funcs;
+export const functions = {
+  createUserFunction,
+  updateUserFunction,
+  deleteUserFunction,
+};

@@ -9,7 +9,7 @@ import {
   pgTableCreator,
 } from "drizzle-orm/pg-core";
 
-export const createTable = pgTableCreator((name) => `morseacad_${name}`);
+export const createTable = pgTableCreator((name) => `morse_web3_${name}`);
 
 // Create an enum for user roles
 export const userRoleEnum = pgEnum("user_role", ["buyer", "seller"]);
@@ -32,7 +32,7 @@ export const contents = createTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     creatorId: varchar("creator_id", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     title: varchar("title", { length: 256 }).notNull(),
     description: text("description"),
     priceUSD: varchar("priceUSD").notNull(),
@@ -53,10 +53,10 @@ export const contentAccess = createTable(
     id: varchar("id", { length: 255 }).primaryKey().notNull(),
     contentId: varchar("content_id", { length: 255 })
       .notNull()
-      .references(() => contents.id),
+      .references(() => contents.id, { onDelete: "cascade" }),
     userId: varchar("user_id", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     purchasedAt: timestamp("purchased_at", { withTimezone: true }).defaultNow(),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     isActive: boolean("is_active").notNull().default(true),

@@ -15,6 +15,7 @@ export async function updateUser(userId, userData) {
         email: userData.email || null,
         profileImage: userData.profileImage || null,
         updatedAt: new Date(),
+        walletAddress: userData.walletAddress || null,
       })
       .where(eq(users.id, userId))
       .returning();

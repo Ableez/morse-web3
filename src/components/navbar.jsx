@@ -37,6 +37,7 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { Drawer, DrawerClose, DrawerContent, DrawerTrigger } from "./ui/drawer";
+import SearchBar from "./search-bar";
 
 const Navbar = () => {
   const [open, setOpen] = React.useState(false);
@@ -68,45 +69,7 @@ const Navbar = () => {
         >
           <kbd>CTRL⌘K</kbd>
         </Button>
-
-        <CommandDialog open={open} onOpenChange={setOpen}>
-          <CommandInput placeholder="CMD K Type a command or search..." />
-          <CommandList className={"max-w-screen-sm mx-auto"}>
-            <CommandEmpty>No results found.</CommandEmpty>
-            {/* <CommandGroup heading="Suggestions">
-              <CommandItem>
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span>Calendar</span>
-              </CommandItem>
-              <CommandItem>
-                <FaceIcon className="mr-2 h-4 w-4" />
-                <span>Search Emoji</span>
-              </CommandItem>
-              <CommandItem>
-                <RocketIcon className="mr-2 h-4 w-4" />
-                <span>Launch</span>
-              </CommandItem>
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup heading="Settings">
-              <CommandItem>
-                <PersonStandingIcon className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-                <CommandShortcut>⌘P</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <EnvelopeClosedIcon className="mr-2 h-4 w-4" />
-                <span>Mail</span>
-                <CommandShortcut>⌘B</CommandShortcut>
-              </CommandItem>
-              <CommandItem>
-                <GearIcon className="mr-2 h-4 w-4" />
-                <span>Settings</span>
-                <CommandShortcut>⌘S</CommandShortcut>
-              </CommandItem>
-            </CommandGroup> */}
-          </CommandList>
-        </CommandDialog>
+        <SearchBar />
 
         <SignedOut>
           <SignInWithMetamaskButton mode="modal">

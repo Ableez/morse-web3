@@ -1,11 +1,11 @@
 {
-  "id": "e738d9bd-d21e-470a-bbbc-956e2ae850b2",
+  "id": "da741451-15cc-4ef7-a9a7-59a754521f4d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.morseacad_content_access": {
-      "name": "morseacad_content_access",
+    "public.morse_web3_content_access": {
+      "name": "morse_web3_content_access",
       "schema": "",
       "columns": {
         "id": {
@@ -101,38 +101,38 @@
         }
       },
       "foreignKeys": {
-        "morseacad_content_access_content_id_morseacad_contents_id_fk": {
-          "name": "morseacad_content_access_content_id_morseacad_contents_id_fk",
-          "tableFrom": "morseacad_content_access",
-          "tableTo": "morseacad_contents",
+        "morse_web3_content_access_content_id_morse_web3_contents_id_fk": {
+          "name": "morse_web3_content_access_content_id_morse_web3_contents_id_fk",
+          "tableFrom": "morse_web3_content_access",
+          "tableTo": "morse_web3_contents",
           "columnsFrom": [
             "content_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "morseacad_content_access_user_id_morseacad_users_id_fk": {
-          "name": "morseacad_content_access_user_id_morseacad_users_id_fk",
-          "tableFrom": "morseacad_content_access",
-          "tableTo": "morseacad_users",
+        "morse_web3_content_access_user_id_morse_web3_users_id_fk": {
+          "name": "morse_web3_content_access_user_id_morse_web3_users_id_fk",
+          "tableFrom": "morse_web3_content_access",
+          "tableTo": "morse_web3_users",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.morseacad_contents": {
-      "name": "morseacad_contents",
+    "public.morse_web3_contents": {
+      "name": "morse_web3_contents",
       "schema": "",
       "columns": {
         "id": {
@@ -237,25 +237,25 @@
         }
       },
       "foreignKeys": {
-        "morseacad_contents_creator_id_morseacad_users_id_fk": {
-          "name": "morseacad_contents_creator_id_morseacad_users_id_fk",
-          "tableFrom": "morseacad_contents",
-          "tableTo": "morseacad_users",
+        "morse_web3_contents_creator_id_morse_web3_users_id_fk": {
+          "name": "morse_web3_contents_creator_id_morse_web3_users_id_fk",
+          "tableFrom": "morse_web3_contents",
+          "tableTo": "morse_web3_users",
           "columnsFrom": [
             "creator_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.morseacad_users": {
-      "name": "morseacad_users",
+    "public.morse_web3_users": {
+      "name": "morse_web3_users",
       "schema": "",
       "columns": {
         "id": {

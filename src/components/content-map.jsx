@@ -214,14 +214,15 @@ export default function NFTDisplay(props) {
   if (!nfts) {
     return "No NFTs";
   }
+
+  console.log(nfts);
   return (
     <div className="container mx-auto max-w-screen-lg p-4">
       <h1 className="text-3xl font-bold mb-6">Morse</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         {nfts?.map((nft, idx) => {
-          const isOwned = user
-            ? nft.accesses.find((n) => n.userId === user.id)
-            : false;
+          const isOwned = user ? nft.isOwned : false;
+          const isCreator = nft.creatorId === user?.id;
 
           return (
             <motion.div
@@ -280,7 +281,11 @@ export default function NFTDisplay(props) {
                         "w-full flex align-middle place-items-center justify-center gap-2"
                       }
                     >
-                      {isOwned ? (
+                      {isCreator ? (
+                        <Button className={"w-full"} disabled>
+                          You created this
+                        </Button>
+                      ) : isOwned ? (
                         <Button
                           disabled={loading}
                           className="w-full dark:bg-blue-500 dark:hover:bg-blue-500/80 dark:text-white"

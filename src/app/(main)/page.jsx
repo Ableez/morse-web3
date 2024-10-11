@@ -1,9 +1,13 @@
 import { Suspense } from "react";
 import NFTDisplay from "@/components/content-map";
 import { getNFTs } from "@/lib/get-home-nfts";
+import SearchBar from "@/components/search-bar";
+import PaginationControl from "@/components/pagination-control";
 
-export default async function Home() {
-  const nfts = await getNFTs();
+export default async function Home({ searchParams }) {
+  const page = Number(searchParams.page) || 1;
+  const search = searchParams.search || "";
+  const { nfts, totalPages, currentPage } = await getNFTs(page, 9, search);
 
   if (!nfts || nfts.length === 0) {
     return (
@@ -14,9 +18,12 @@ export default async function Home() {
   }
 
   return (
-    <Suspense fallback={<LoadingNFTs />}>
-      <NFTDisplay nfts={nfts} />;
-    </Suspense>
+    <>
+      <Suspense fallback={<LoadingNFTs />}>
+        <NFTDisplay nfts={nfts} />
+        <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+      </Suspense>
+    </>
   );
 }
 

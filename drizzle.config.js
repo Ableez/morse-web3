@@ -6,7 +6,7 @@ const cfg = {
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
-  tablesFilter: ["morseacad_*"],
+  tablesFilter: ["morse_web3_*"],
   out: "./drizzle",
 };
 
