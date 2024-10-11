@@ -1,22 +1,9 @@
 import { Suspense } from "react";
 import NFTDisplay from "@/components/content-map";
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { getNFTs } from "@/lib/get-home-nfts";
 
 export default async function Home() {
-  return (
-    <Suspense fallback={<LoadingNFTs />}>
-      <NFTList />
-    </Suspense>
-  );
-}
-
-async function NFTList() {
-  const user = await auth();
-
-  console.log("USER: ", user);
-
-  const nfts = await getNFTs(user?.userId ?? "guest");
+  const nfts = await getNFTs();
 
   if (!nfts || nfts.length === 0) {
     return (
@@ -26,7 +13,11 @@ async function NFTList() {
     );
   }
 
-  return <NFTDisplay nfts={nfts} />;
+  return (
+    <Suspense fallback={<LoadingNFTs />}>
+      <NFTDisplay nfts={nfts} />;
+    </Suspense>
+  );
 }
 
 function LoadingNFTs() {
