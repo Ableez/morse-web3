@@ -15,8 +15,6 @@ async function NFTList() {
   const { userId } = await currentUser();
   const nfts = await getNFTs(userId ?? "guest");
 
-  console.log("FR", nfts);
-
   if (!nfts || nfts.length === 0) {
     return (
       <div className="w-screen h-[400px] flex justify-center items-center font-bold opacity-50">

@@ -132,8 +132,6 @@ const NFTDetails = ({ content, isCreator }) => {
       // Use the Blob API to handle binary data correctly
       const blob = await resp.blob();
 
-      console.log("BLOB: ", blob);
-
       // Create a temporary URL for the blob
       const url = window.URL.createObjectURL(blob);
 
@@ -144,7 +142,8 @@ const NFTDetails = ({ content, isCreator }) => {
 
       // Set the file name
       // You might want to get the actual file name from the content metadata if available
-      const fileName = content.title.replace(/\s+/g, "_") + ".pdf";
+      const fileName =
+        content.title.replace(/\s+/g, "_") + getFileExtension(".pdf");
       a.download = fileName;
 
       // Append to the document, trigger the download, and clean up
@@ -247,7 +246,7 @@ const NFTDetails = ({ content, isCreator }) => {
         <div className="md:p-8 p-3">
           <div className="flex justify-between items-center mb-8">
             <Link
-              href="/"
+              href="/user-page"
               className="text-xs opacity-60 flex align-middle place-items-center justify-start"
             >
               <ArrowLeft size={16} className="inline-block mr-2" />
@@ -262,7 +261,7 @@ const NFTDetails = ({ content, isCreator }) => {
                 <Image
                   width={400}
                   height={400}
-                  src={content.coverImage}
+                  src={"/placeholder.svg"}
                   alt={content.title}
                   className="w-full h-auto object-cover"
                 />

@@ -1,3 +1,5 @@
+"use server";
+
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getNFTSERVERONLY } from "./getnft_action";
 import { db } from "@/db";
@@ -8,7 +10,13 @@ export async function getNFTs(userId) {
   try {
     if (!userId || userId === "guest") {
       // Fetch all NFTs when there's no user or for guest users
-      const nfts = await db.select().from(contents);
+      const nfts = await db.query.contents.findMany({
+        with: {
+          accesses: true,
+          creator: true,
+        },
+        orderBy: [desc(contents.createdAt)],
+      });
 
       return nfts;
     }
@@ -50,3 +58,25 @@ export const fetchContent = async (cid) => {
   console.log(response);
   return response;
 };
+
+export async function getUserNFTs(userId) {
+  try {
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    const userNfts = await db.query.contents.findMany({
+      where: eq(contents.creatorId, userId),
+      with: {
+        accesses: true,
+        creator: true,
+      },
+      orderBy: [desc(contents.createdAt)],
+    });
+
+    return userNfts;
+  } catch (error) {
+    console.error("Error fetching user NFTs:", error);
+    throw new Error("Failed to fetch user NFTs");
+  }
+}

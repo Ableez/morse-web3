@@ -1,4 +1,4 @@
-
+"server only";
 
 export async function getNFTSERVERONLY(cid) {
   try {

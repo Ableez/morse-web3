@@ -319,7 +319,7 @@ const CreatorUpload = () => {
       const createContentTx = await contract.createContent(
         ethers.utils.parseEther(priceETHString),
         uploadResponse.cid,
-        { gasLimit: BigNumber.from(estimatedGasLimit) }
+        // { gasLimit: BigNumber.from(estimatedGasLimit) }
       );
       const receipt = await createContentTx.wait();
       const event = receipt.events.find((e) => e.event === "ContentCreated");

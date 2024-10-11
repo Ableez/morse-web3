@@ -12,6 +12,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { ethers } from "ethers";
 import { useToast } from "@/hooks/use-toast";
 import { BASE_URL } from "../../../../utils/base-url";
+import { getUserNFTs } from "@/lib/fetch-nft";
 
 export default function UserProfile() {
   const { user } = useUser();
@@ -66,19 +67,10 @@ export default function UserProfile() {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `${BASE_URL || ""}/api/contents/get-user-nfts/${user.id}`,
-        {
-          mode: "no-cors",
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch user contents");
-      }
-      const data = await response.json();
+      const data = await getUserNFTs(user.id);
 
       console.log("DATA", data);
-      setContents(data.nfts);
+      setContents(data);
     } catch (error) {
       console.error("Error fetching user contents:", error);
       toast({
