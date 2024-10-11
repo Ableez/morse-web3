@@ -1,12 +1,9 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
-export async function POST(request) {
+export async function createUser(body) {
   try {
-    const body = await request.json();
-
     const userAlreadyExists = await db
       .select()
       .from(users)
@@ -14,10 +11,7 @@ export async function POST(request) {
       .limit(1);
 
     if (userAlreadyExists.length > 0) {
-      return NextResponse.json(
-        { status: "error", message: "User already exists" },
-        { status: 400 }
-      );
+      return null;
     }
 
     const newUser = await db
@@ -31,15 +25,9 @@ export async function POST(request) {
       })
       .returning();
 
-    return NextResponse.json(
-      { status: "success", user: newUser[0] },
-      { status: 201 }
-    );
+    return newUser[0];
   } catch (error) {
     console.error("Error creating user:", error);
-    return NextResponse.json(
-      { status: "error", message: "Failed to create user" },
-      { status: 500 }
-    );
+    return null;
   }
 }

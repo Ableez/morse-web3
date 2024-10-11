@@ -1,3 +1,4 @@
+import { createUser } from "@/lib/create-user-action";
 import { BASE_URL } from "../base-url";
 import { inngest } from "./client";
 
@@ -14,20 +15,18 @@ export const createUserFunction = inngest.createFunction(
         profileImage: event.data.image_url || "",
         primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
-      const resp = await fetch(`${BASE_URL || ""}/api/user/create`, {
-        method: "POST",
-        body: JSON.stringify({
-          id: event.data.id,
-          username: event.data.username,
-          email: event.data.email_addresses[0]?.email_address || "",
-          profileImage: event.data.image_url || "",
-          primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
-        }),
+
+      const created = await createUser({
+        id: event.data.id,
+        username: event.data.username,
+        email: event.data.email_addresses[0]?.email_address || "",
+        profileImage: event.data.image_url || "",
+        primary_web3_wallet_id: event.data.primary_web3_wallet_id || "",
       });
 
       console.log("User created:", {
         status: "success",
-        user: await resp.json(),
+        user: created,
       });
       // return
     } catch (error) {
@@ -45,25 +44,18 @@ export const updateUserFunction = inngest.createFunction(
     console.log("User update event received:", event);
 
     try {
-      const response = await fetch(
-        `${BASE_URL || ""}/api/user/update/${event.data.id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            username: event.data.username,
-            email: event.data.email_addresses[0].email_address,
-            profileImage: event.data.image_url,
-          }),
-        }
-      );
+      const updated = await updateUser(event.data.id, {
+        username: event.data.username,
+        email: event.data.email_addresses[0].email_address,
+        profileImage: event.data.image_url,
+      });
 
-      if (!response.ok) {
-        throw new Error(`Failed to update user: ${response.statusText}`);
+      if (!updated) {
+        throw new Error("User not found");
       }
 
-      const result = await response.json();
-      console.log("User updated:", result);
-      return result;
+      console.log("User updated:", updated);
+      return updated;
     } catch (error) {
       console.error("Error updating user:", error);
       throw error;
