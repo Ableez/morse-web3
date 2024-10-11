@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import NFTDisplay from "@/components/content-map";
-import { getNFTs } from "@/lib/fetch-nft";
 import { currentUser } from "@clerk/nextjs/server";
+import { getNFTs } from "@/lib/get-home-nfts";
 
 export default async function Home() {
   return (
