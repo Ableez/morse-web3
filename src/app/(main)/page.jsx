@@ -7,9 +7,9 @@ import PaginationControl from "@/components/pagination-control";
 export default async function Home({ searchParams }) {
   const page = Number(searchParams.page) || 1;
   const search = searchParams.search || "";
-  const { nfts, totalPages, currentPage } = await getNFTs(page, 9, search);
+  const resp = await getNFTs(page, 9, search);
 
-  if (!nfts || nfts.length === 0) {
+  if (!resp.nfts || resp.nfts.length === 0) {
     return (
       <div className="w-screen h-[400px] flex justify-center items-center font-bold opacity-50">
         We have no NFTs to show
@@ -17,11 +17,16 @@ export default async function Home({ searchParams }) {
     );
   }
 
+  // { nfts, totalPages, currentPage }
+
   return (
     <>
       <Suspense fallback={<LoadingNFTs />}>
-        <NFTDisplay nfts={nfts} />
-        <PaginationControl totalPages={totalPages} currentPage={currentPage} />
+        <NFTDisplay nfts={resp.nfts} />
+        <PaginationControl
+          totalPages={resp.totalPages}
+          currentPage={resp.currentPage}
+        />
       </Suspense>
     </>
   );

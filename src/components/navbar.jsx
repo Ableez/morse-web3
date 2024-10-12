@@ -62,13 +62,7 @@ const Navbar = () => {
         }
       >
         <UserButton />
-        <Button
-          onClick={() => setOpen(true)}
-          variant="outline"
-          className={"w-full justify-start"}
-        >
-          <kbd>CTRL⌘K</kbd>
-        </Button>
+
         <SearchBar />
 
         <SignedOut>
