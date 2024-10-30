@@ -258,7 +258,7 @@ export default function NFTDisplay(props) {
                       {nft.title}
                     </h2>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4 w-[85%] truncate">
                     {nft.description}
                   </p>
                   <div className="flex justify-between items-center mb-2">
